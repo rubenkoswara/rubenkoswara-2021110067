@@ -2,6 +2,15 @@
 
 @section('content')
     <h1 class="mb-4">Form Tambah Produk</h1>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form action="{{ route('products.store') }}" method="post">
         @csrf
         <div class="mb-3">

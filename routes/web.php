@@ -3,26 +3,25 @@
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
-// Halaman utama
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-// Rute untuk fungsionalitas produk
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/trashed', [ProductController::class, 'trashed'])->name('products.trashed');
+    Route::post('/products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    
+});
+
+Auth::routes();
+
+
+
+

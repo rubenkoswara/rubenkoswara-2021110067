@@ -3,6 +3,8 @@
 @section('content')
     <h1 class="mb-4">Daftar Produk</h1>
     <a href="{{ route('products.create') }}" class="btn btn-primary mb-3">Tambah Produk Baru</a>
+    <a href="{{ route('products.trashed') }}" class="btn btn-info mb-3">Restore</a>
+
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif

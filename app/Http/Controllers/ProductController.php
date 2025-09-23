@@ -25,12 +25,12 @@ class ProductController extends Controller
     }
 
     /**
-     * Menyimpan produk baru ke database.
+     * Menyimpan produk baru ke database dengan validasi.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'product_name' => 'required|string|max:255',
+            'product_name' => 'required|string|max:255|unique:products,product_name',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
             'category' => 'nullable|string|max:100',
@@ -56,7 +56,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'product_name' => 'required|string|max:255',
+            'product_name' => 'required|string|max:255|unique:products,product_name,' . $product->id,
             'price' => 'required|numeric',
             'stock' => 'required|integer',
             'category' => 'nullable|string|max:100',
@@ -72,9 +72,21 @@ class ProductController extends Controller
      * Menghapus produk dari database.
      */
     public function destroy(Product $product)
-    {
-        $product->delete();
+        {
+            $product->delete(); // Ini akan melakukan soft delete
+            return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+        }
 
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+    public function trashed()
+        {
+            $trashedProducts = Product::onlyTrashed()->get();
+            return view('products.trashed', compact('trashedProducts'));
+        }
+
+    public function restore($id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+        $product->restore();
+        return redirect()->route('products.index')->with('success', 'Produk berhasil dipulihkan!');
     }
 }
