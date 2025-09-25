@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,6 +18,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/products/trashed', [ProductController::class, 'trashed'])->name('products.trashed');
     Route::post('/products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+        // Rute untuk profil
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     
 });
 
