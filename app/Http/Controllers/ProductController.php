@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -35,9 +36,17 @@ class ProductController extends Controller
             'stock' => 'required|integer',
             'category' => 'nullable|string|max:100',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        Product::create($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        Product::create($data);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan!');
     }
@@ -61,9 +70,21 @@ class ProductController extends Controller
             'stock' => 'required|integer',
             'category' => 'nullable|string|max:100',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $product->update($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $imagePath = $request->file('image')->store('products', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        $product->update($data);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui!');
     }
@@ -72,16 +93,34 @@ class ProductController extends Controller
      * Menghapus produk dari database.
      */
     public function destroy(Product $product)
-        {
-            $product->delete(); // Ini akan melakukan soft delete
-            return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+    {
+        // Hapus gambar dari storage sebelum melakukan soft delete
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+        $product->delete();
+        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+    }
+
+    /**
+     * Menghapus gambar produk dari storage dan database.
+     */
+    public function destroyImage(Product $product)
+    {
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+            $product->update(['image' => null]);
+            return redirect()->back()->with('success', 'Gambar produk berhasil dihapus.');
         }
 
+        return redirect()->back()->with('error', 'Tidak ada gambar yang bisa dihapus.');
+    }
+
     public function trashed()
-        {
-            $trashedProducts = Product::onlyTrashed()->get();
-            return view('products.trashed', compact('trashedProducts'));
-        }
+    {
+        $trashedProducts = Product::onlyTrashed()->get();
+        return view('products.trashed', compact('trashedProducts'));
+    }
 
     public function restore($id)
     {
